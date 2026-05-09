@@ -17,14 +17,19 @@ class Users(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(128), nullable=False)
     phone = db.Column(db.String(20), nullable=True)
-    location = db.Column(db.String(100), nullable=True)
+    city = db.Column(db.String(100), nullable=True)
+    state_province = db.Column(db.String(100), nullable=True)
+    country = db.Column(db.String(100), nullable=True)
+    continent = db.Column(db.String(50), nullable=True)
     bio = db.Column(db.Text, nullable=True)
-    profile_picture_url = db.Column(db.String(255), nullable=True)
     dob = db.Column(db.Date, nullable=True)
-    gender_id = db.Column(db.Integer(20), db.ForeignKey('genders.id'), nullable=True)
-    pronouns_id = db.Column(db.Integer(20), db.ForeignKey('pronouns.id'), nullable=True)
+    gender_id = db.Column(db.Integer, db.ForeignKey('genders.id'), nullable=True)
+    pronouns_id = db.Column(db.Integer, db.ForeignKey('pronouns.id'), nullable=True)
+    profile_picture_url = db.Column(db.String(255), nullable=True)
+    system_role = db.Column(db.String(50), nullable=False, default='user')  # user, admin, superadmin etc. This is separate from the user roles in case we want to have system-level roles that aren't tied to specific tours or shows.
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
     updated_at = db.Column(db.DateTime(timezone=True), onupdate=func.now())
+    
     
 #----Relationships----  
 
@@ -36,8 +41,8 @@ class Users(db.Model):
     certifications = relationship("UserCertifications", back_populates="user", cascade="all, delete-orphan")
     social_media_links = relationship("UserSocialMediaLinks", back_populates="user", cascade="all, delete-orphan")
     
-    tour_crew = relationship("TourCrew", back_populates="user", cascade="all, delete-orphan")
-    show_crew = relationship("ShowCrew", back_populates="user", cascade="all, delete-orphan")
+    tour_crew = relationship("TourCrew", back_populates="user", passive_deletes=True)
+    show_crew = relationship("ShowCrew", back_populates="user", passive_deletes=True)
     
 class Genders(db.Model):
     __tablename__ = 'genders'
@@ -70,8 +75,8 @@ class Roles(db.Model):
 #----Relationships----
 
     user_roles = relationship("UserRoles", back_populates="role", cascade="all, delete-orphan")
-    tour_crew = relationship("TourCrew", back_populates="role", cascade="all, delete-orphan")
-    show_crew = relationship("ShowCrew", back_populates="role", cascade="all, delete-orphan")
+    tour_crew = relationship("TourCrew", back_populates="role", passive_deletes=True)
+    show_crew = relationship("ShowCrew", back_populates="role", passive_deletes=True)
 
 
 class Skills(db.Model):
@@ -213,7 +218,7 @@ class TourCrew(db.Model):
     __tablename__ = 'tour_crew'
     id = db.Column(db.Integer, primary_key=True)
     tour_id = db.Column(db.Integer, db.ForeignKey('tours.id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete="SET NULL"), nullable=True)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=False)
     artist_worked_for = db.Column(MutableList.as_mutable(db.ARRAY(db.String)), nullable=True)  # List of artists the crew member has worked for on this tour. Derived from Tour Requests headliner and support artists.
     start_date = db.Column(db.String(255), nullable=False)  # Start date of the crew member's involvement in the tour
@@ -240,7 +245,7 @@ class ShowCrew(db.Model):
     __tablename__ = 'show_crew'
     id = db.Column(db.Integer, primary_key=True)
     show_id = db.Column(db.Integer, db.ForeignKey('shows.id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete="SET NULL"), nullable=True)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=False)
     artist_worked_for = db.Column(MutableList.as_mutable(db.ARRAY(db.String)), nullable=True)  # List of artists the crew member has worked for on this show. Derived from TourArtists headliner and support artists.
     coverage_url = db.Column(db.String(255), nullable=True)  # Optional URL to a news article, blog post, or social media post that mentions the crew member's work on this show

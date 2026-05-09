@@ -1,6 +1,11 @@
 Name: CruChq.com
 Overview: CrewLink is a software app designed to let touring or live event professionals search crew members by location, skill set, and availability. It provides a platform for crew members to create profiles showcasing their experience and for employers to find suitable candidates for their events. The app aims to streamline the hiring process in the live event industry, making it easier for both crew members and employers to connect and collaborate on projects.    Word of mouth is great but this makes it cleaner and more efficient. Future features include messages, endorsement ratings, and payment processing. The app will be available on both iOS and Android platforms, ensuring accessibility for a wide range of users. By providing a centralized platform for crew members and employers, CrewLink aims to enhance the efficiency and effectiveness of the hiring process in the live event industry.
 
+User Stories:
+   - users sign up and create profiles with their experience, skills, and availability for live event work, mainly in music. 
+   - employers can search for crew members based on location, skill set, and availability, and contact them for potential job opportunities.
+   - crew members can receive endorsements and ratings from employers they have worked with, building their reputation within the industry.
+   - users can message each other within the app to discuss job opportunities, negotiate terms, and coordinate logistics.
 
 Tables:
 
