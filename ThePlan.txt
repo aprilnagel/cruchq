@@ -1,0 +1,181 @@
+Name: CruChq.com
+Overview: CrewLink is a software app designed to let touring or live event professionals search crew members by location, skill set, and availability. It provides a platform for crew members to create profiles showcasing their experience and for employers to find suitable candidates for their events. The app aims to streamline the hiring process in the live event industry, making it easier for both crew members and employers to connect and collaborate on projects.    Word of mouth is great but this makes it cleaner and more efficient. Future features include messages, endorsement ratings, and payment processing. The app will be available on both iOS and Android platforms, ensuring accessibility for a wide range of users. By providing a centralized platform for crew members and employers, CrewLink aims to enhance the efficiency and effectiveness of the hiring process in the live event industry.
+
+
+Tables:
+
+1. Users Table:
+   - user_id (primary key)
+   - first name
+   - last name
+   - email
+   - password_hash
+   - location
+   - bio
+   - profile_picture_url
+   - website_url
+   - phone_number
+   - date_of_birth
+   - gender_id (foreign key)
+   - created_at
+   - updated_at
+
+2. Gender Table:
+    - gender_id (primary key)
+    - gender_name
+
+3. User_social_links Table:
+   - user_social_link_id (primary key)
+   - user_id (foreign key)
+   - platform_id (foreign key)
+   - profile_url
+   - created_at
+   - updated_at
+
+4. Platforms Table:
+   - platform_id (primary key)
+   - platform_name
+
+4. Roles Table:
+   - role_id (primary key)
+   - role_name
+   - role_category (crew, press)
+
+5. User_Roles Table:
+   - user_role_id (primary key)
+   - user_id (foreign key)
+   - role_id (foreign key)
+
+6. Skills Table:
+   - skill_id (primary key)
+   - skill_name
+
+7. User_Skills Table:
+   - user_skill_id (primary key)
+   - user_id (foreign key)
+   - skill_id (foreign key)
+   - proficiency_level
+
+8. Tours Table:
+   - tour_id (primary key)
+   - tour_name
+   - start_date
+   - end_date
+   - locations
+   - country
+   - continent
+   - size (show capacity)
+
+9. Shows Table
+    - show_id (primary key)
+    - tour_id (foreign key, nullable)
+    - show_name
+    - show_date
+    - venue_id (foreign key)
+
+10. Show_crew Table:
+   - show_crew_id (primary key)
+   - show_id (foreign key)
+   - user_id (foreign key)
+   - role_id (foreign key)
+   - artist_worked_for (nullable)
+   - coverage_url (nullable)
+   - start_date
+   - end_date
+
+11. Venue Table:
+   - venue_id (primary key)
+   - venue_name
+   - location
+   - capacity
+   - contact_info
+
+12. Tour_crew Table:
+   - tour_crew_id (primary key)
+   - tour_id (foreign key)
+   - user_id (foreign key)
+   - role_id (foreign key)
+   - artist_worked_for
+   - start_date
+   - end_date
+
+13. Tour_artists Table:
+   - tour_artist_id (primary key)
+   - tour_id (foreign key)
+   - artist_name
+   - role (headliner, support act, etc.)
+   - created_at
+   - updated_at
+
+14. Tour_requests Table:
+   - tour_request_id (primary key)
+   - requester_id (foreign key, user_id of the person making the request)
+   - tour_name
+   - headliner_name
+   - support_artist_name
+   - location
+   - continent
+   - year
+   - notes
+   - status (pending, accepted, rejected)
+   - created_at
+   - updated_at
+   - reviewed_by (foreign key to users table for admin review)
+
+15. Endorsements Table:
+   - endorsement_id (primary key)
+   - user_id (foreign key)
+   - endorser_id (foreign key)
+   - tour_id (foreign key)
+   - show_id (foreign key)
+   - strength_tag (calm under pressure, great communicator, etc.)
+   - rating
+   - comment
+   - created_at
+
+16. Availability Table/Calendar:
+   - availability_id (primary key)
+   - user_id (foreign key)
+   - start_date
+   - end_date
+   - is_available
+
+17. Certifications Table:
+   - certification_id (primary key)
+   - certification_name
+   - issuing_organization
+   - issue_date
+   - expiration_date
+
+18. User_Certifications Table:
+   - user_certification_id (primary key)
+   - user_id (foreign key)
+   - certification_id (foreign key)
+
+19. Messages Table: (Future feature)
+    - message_id (primary key)
+    - sender_id (foreign key)
+    - receiver_id (foreign key)
+    - tour_id (foreign key)
+    - show_id (foreign key)
+    - content
+    - created_at
+
+20. Notifications Table: (Future feature)
+    - notification_id (primary key)
+    - user_id (foreign key)
+    - content
+    - is_read
+    - created_at
+
+21. Payments Table:(Future feature)
+    - payment_id (primary key)
+    - sender_id (foreign key)
+    - receiver_id (foreign key)
+    - amount
+    - currency
+    - tour_id (foreign key)
+    - show_id (foreign key)
+    - payment_date
+    - payment_status
+
