@@ -28,6 +28,9 @@ class SignupSchema(Schema):
 
     gender_id = fields.Integer(required=False)
     pronouns_id = fields.Integer(required=False)
+    
+    roles = fields.List(fields.Integer(), required=False)
+    
         
 signup_schema = SignupSchema()
 

@@ -7,7 +7,7 @@ from sqlalchemy.ext.mutable import MutableList # For mutable list columns
 
 #Model relationships: create a python-level connection between tables so we can do things like user.role, tour.shows etc.
 #Back_populates: Tells SQLAlchemy to populate the relationship in both directions. Each relationship has two sides, Parent and Child. 
-#relationship syntax: name = relationship("RelatedModel Name", back_populates="related_model_attribute_name_in_related_model" (thr name we give it), cascade="all, delete-orphan")
+#relationship syntax: name = relationship("RelatedModel Name", back_populates="related_model_attribute_name_in_related_model" (the name we give it), cascade="all, delete-orphan")
 
 class Users(db.Model):
     __tablename__ = 'users'
@@ -37,6 +37,7 @@ class Users(db.Model):
     pronouns = relationship("Pronouns", back_populates="users")
     
     user_roles = relationship("UserRoles", back_populates="user", cascade="all, delete-orphan") 
+    user_experience_roles = relationship("UserExperienceRoles", back_populates="user", cascade="all, delete-orphan")
     user_skills = relationship("UserSkills", back_populates="user", cascade="all, delete-orphan")
     user_certifications = relationship("UserCertifications", back_populates="user", cascade="all, delete-orphan")
     user_social_media_links = relationship("UserSocialMediaLinks", back_populates="user", cascade="all, delete-orphan")
@@ -72,18 +73,27 @@ class SocialMediaPlatforms(db.Model):
 
     user_social_media_links = relationship("UserSocialMediaLinks", back_populates="platform", cascade="all, delete-orphan")
 
+class ExperienceRoles(db.Model):
+    __tablename__ = 'experience_roles'
+    id = db.Column(db.Integer, primary_key=True)
+    ex_role_name = db.Column(db.String(50), nullable=False)
+    ex_role_category = db.Column(db.String(50), nullable=False)
+    
+#----Relationships----
+
+    user_experience_roles = relationship("UserExperienceRoles", back_populates="experience_role")
+    tour_crew = relationship("TourCrew", back_populates="experience_role", passive_deletes=True)
+    show_crew = relationship("ShowCrew", back_populates="experience_role", passive_deletes=True)
+    
 class Roles(db.Model):
     __tablename__ = 'roles'
     id = db.Column(db.Integer, primary_key=True)
     role_name = db.Column(db.String(50), nullable=False)
-    role_category = db.Column(db.String(50), nullable=False)
     
 #----Relationships----
 
     user_roles = relationship("UserRoles", back_populates="role", cascade="all, delete-orphan")
-    tour_crew = relationship("TourCrew", back_populates="role", passive_deletes=True)
-    show_crew = relationship("ShowCrew", back_populates="role", passive_deletes=True)
-
+    
 
 class Skills(db.Model):
     __tablename__ = 'skills'
@@ -193,6 +203,15 @@ class UserRoles(db.Model):
     
     user = relationship("Users", back_populates="user_roles")
     role = relationship("Roles", back_populates="user_roles")
+
+class UserExperienceRoles(db.Model):
+    __tablename__ = 'user_experience_roles'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    experience_role_id = db.Column(db.Integer, db.ForeignKey('experience_roles.id'), nullable=False)
+    
+    user = relationship("Users", back_populates="user_experience_roles")
+    experience_role = relationship("ExperienceRoles", back_populates="user_experience_roles")
     
 class UserSkills(db.Model):
     __tablename__ = 'user_skills'
@@ -228,14 +247,14 @@ class TourCrew(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     tour_id = db.Column(db.Integer, db.ForeignKey('tours.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete="SET NULL"), nullable=True)
-    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=False)
+    experience_role_id = db.Column(db.Integer, db.ForeignKey('experience_roles.id'), nullable=False)
     artist_worked_for = db.Column(MutableList.as_mutable(db.ARRAY(db.String)), nullable=True)  # List of artists the crew member has worked for on this tour. Derived from Tour Requests headliner and support artists.
     start_date = db.Column(db.String(255), nullable=False)  # Start date of the crew member's involvement in the tour
     end_date = db.Column(db.String(255), nullable=True)  # End date of the crew member's involvement in the tour (can be null if still active)
     
     tour = relationship("Tours", back_populates="tour_crew")
     user = relationship("Users", back_populates="tour_crew")
-    role = relationship("Roles", back_populates="tour_crew")
+    experience_role = relationship("ExperienceRoles", back_populates="tour_crew")
     
 
 class TourArtists(db.Model):
@@ -255,7 +274,7 @@ class ShowCrew(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     show_id = db.Column(db.Integer, db.ForeignKey('shows.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete="SET NULL"), nullable=True)
-    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=False)
+    experience_role_id = db.Column(db.Integer, db.ForeignKey('experience_roles.id'), nullable=False)
     artist_worked_for = db.Column(MutableList.as_mutable(db.ARRAY(db.String)), nullable=True)  # List of artists the crew member has worked for on this show. Derived from TourArtists headliner and support artists.
     coverage_url = db.Column(db.String(255), nullable=True)  # Optional URL to a news article, blog post, or social media post that mentions the crew member's work on this show
     start_date = db.Column(db.String(255), nullable=False)  # Start date of the crew member's involvement in the show
@@ -263,7 +282,7 @@ class ShowCrew(db.Model):
     
     show = relationship("Shows", back_populates="show_crew")
     user = relationship("Users", back_populates="show_crew")
-    role = relationship("Roles", back_populates="show_crew")
+    experience_role = relationship("ExperienceRoles", back_populates="show_crew")
     
 
 

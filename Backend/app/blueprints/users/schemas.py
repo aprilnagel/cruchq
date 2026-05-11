@@ -41,6 +41,10 @@ class UserSchema(ma.SQLAlchemySchema):
     gender = fields.Method("get_gender")
     pronouns = fields.Method("get_pronouns")
 
+    roles = fields.Method("get_roles")
+    
+    def get_roles(self, obj):
+        return [ur.role.role_name for ur in obj.user_roles] if obj.user_roles else []
 
     def get_gender(self, obj):
         return obj.gender.gender_name if obj.gender else None

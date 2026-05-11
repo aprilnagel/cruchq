@@ -3,7 +3,7 @@ from .schemas import signup_schema, login_schema
 from app.blueprints.users.schemas import UserSchema, user_schema
 from app.utility.auth import encode_token, require_system_role, token_required
 from flask import request, jsonify
-from app.models import Users
+from app.models import Users, UserRoles
 from marshmallow import ValidationError
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.extensions import db, limiter
@@ -13,45 +13,55 @@ from app.extensions import db, limiter
 # 1. USER SIGNUP
 # ============================================================
 @auth_bp.route('/signup', methods=['POST'])
-# @limiter.limit("5 per minute")  # Rate limit to prevent abuse
 def signup():
-    # Extract email early to check duplicates
-    email = request.json.get("email")
-    if email and Users.query.filter_by(email=email).first():
-        return jsonify({'message': 'Email already registered'}), 400
     try:
-        # Validate and deserialize input
+        # Validate input
         user_data = signup_schema.load(request.json)
+
+        # Check duplicate email BEFORE creating anything
+        email = user_data.get("email")
+        if Users.query.filter_by(email=email).first():
+            return jsonify({'message': 'Email already registered'}), 400
+
+        # Hash password
+        hashed_password = generate_password_hash(user_data['password'])
+
+        # Create user
+        new_user = Users(
+            first_name=user_data['first_name'],
+            last_name=user_data['last_name'],
+            email=user_data['email'],
+            password=hashed_password,
+            phone=user_data.get('phone'),
+            city=user_data.get('city'),
+            state_province=user_data.get('state_province'),
+            country=user_data.get('country'),
+            continent=user_data.get('continent'),
+            bio=user_data.get('bio'),
+            dob=user_data.get('dob'),
+            gender_id=user_data.get('gender_id'),
+            pronouns_id=user_data.get('pronouns_id')
+        )
+        db.session.add(new_user)
+        db.session.flush()  # ensures new_user.id is available
+
+        # Assign roles
+        role_ids = user_data.get('roles', [])
+        for role_id in role_ids:
+            db.session.add(UserRoles(user_id=new_user.id, role_id=role_id))
+
+        # Commit everything
+        db.session.commit()
+
+        return user_schema.jsonify(new_user), 201
+
     except ValidationError as err:
+        db.session.rollback()
         return jsonify(err.messages), 400
-    
-    #hash password
-    hashed_password = generate_password_hash(user_data['password'])
-        
-       
-    # Create new user instance
-    new_user = Users(
-        first_name=user_data['first_name'],
-        last_name=user_data['last_name'],
-        email=user_data['email'],
-        password=hashed_password,
-        phone=user_data.get('phone'),
-        city=user_data.get('city'),
-        state_province=user_data.get('state_province'),
-        country=user_data.get('country'),
-        continent=user_data.get('continent'),
-        bio=user_data.get('bio'),
-        dob=user_data.get('dob'),
-        gender_id=user_data.get('gender_id'),
-        pronouns_id=user_data.get('pronouns_id')
-    )   
-    # Save to database
-    db.session.add(new_user)
-    db.session.commit()
-    
-    return user_schema.jsonify(new_user), 201
 
-
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
 
 # ============================================================
 # 2. USER LOGIN
