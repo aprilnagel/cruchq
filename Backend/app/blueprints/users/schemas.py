@@ -87,7 +87,7 @@ class UserPublicSchema(ma.SQLAlchemySchema):
         return len(obj.tour_crew) if obj.tour_crew else 0
 
     def get_roles(self, obj):
-        return [role.role_name for role in obj.roles] if obj.roles else []
+        return [ur.role.role_name for ur in obj.user_roles] if obj.user_roles else []
 
     def get_gender(self, obj):
         return obj.gender.gender_name if obj.gender else None
@@ -111,7 +111,6 @@ class UserUpdateSchema(ma.SQLAlchemySchema):
     # Editable fields
     first_name = ma.auto_field()
     last_name = ma.auto_field()
-    username = ma.auto_field()
     email = ma.auto_field()
     phone = ma.auto_field()
     city = ma.auto_field()

@@ -37,11 +37,11 @@ def create_app():
     #import models
     from . import models
     from .blueprints.auth import auth_bp
-    from .blueprints.users import uses_bp
+    from .blueprints.users import users_bp
     
 
     app.register_blueprint(auth_bp, url_prefix='/auth')
-    app.register_blueprint(uses_bp, url_prefix='/users')
+    app.register_blueprint(users_bp, url_prefix='/users')
     
     @app.get("/")
     def home():

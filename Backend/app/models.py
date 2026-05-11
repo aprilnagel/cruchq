@@ -15,7 +15,7 @@ class Users(db.Model):
     first_name = db.Column(db.String(50), nullable=False)
     last_name = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(128), nullable=False)
+    password = db.Column(db.String(500), nullable=False)
     phone = db.Column(db.String(20), nullable=True)
     city = db.Column(db.String(100), nullable=True)
     state_province = db.Column(db.String(100), nullable=True)
@@ -36,13 +36,15 @@ class Users(db.Model):
     gender = relationship("Genders", back_populates="users")
     pronouns = relationship("Pronouns", back_populates="users")
     
-    roles = relationship("UserRoles", back_populates="user", cascade="all, delete-orphan") 
-    skills = relationship("UserSkills", back_populates="user", cascade="all, delete-orphan")
-    certifications = relationship("UserCertifications", back_populates="user", cascade="all, delete-orphan")
-    social_media_links = relationship("UserSocialMediaLinks", back_populates="user", cascade="all, delete-orphan")
+    user_roles = relationship("UserRoles", back_populates="user", cascade="all, delete-orphan") 
+    user_skills = relationship("UserSkills", back_populates="user", cascade="all, delete-orphan")
+    user_certifications = relationship("UserCertifications", back_populates="user", cascade="all, delete-orphan")
+    user_social_media_links = relationship("UserSocialMediaLinks", back_populates="user", cascade="all, delete-orphan")
     
     tour_crew = relationship("TourCrew", back_populates="user", passive_deletes=True)
     show_crew = relationship("ShowCrew", back_populates="user", passive_deletes=True)
+    
+    tour_requests = relationship("TourRequests", back_populates="requestor")
     
 class Genders(db.Model):
     __tablename__ = 'genders'
@@ -65,6 +67,10 @@ class SocialMediaPlatforms(db.Model):
     __tablename__ = 'social_media_platforms'
     id = db.Column(db.Integer, primary_key=True)
     platform_name = db.Column(db.String(50), nullable=False)
+    
+#----Relationships----
+
+    user_social_media_links = relationship("UserSocialMediaLinks", back_populates="platform", cascade="all, delete-orphan")
 
 class Roles(db.Model):
     __tablename__ = 'roles'
@@ -143,6 +149,7 @@ class Tours(db.Model):
     tour_crew = relationship("TourCrew", back_populates="tour", cascade="all, delete-orphan")
     tour_artists = relationship("TourArtists", back_populates="tour", cascade="all, delete-orphan")
 
+    
 
 class Shows(db.Model):
     __tablename__ = 'shows'
@@ -153,8 +160,10 @@ class Shows(db.Model):
     
 #----Relationships----
 
-    crew = relationship("ShowCrew", back_populates="show", cascade="all, delete-orphan")
+    show_crew = relationship("ShowCrew", back_populates="show", cascade="all, delete-orphan")
     venue = relationship("Venues", back_populates="shows")
+    
+    tour = relationship("Tours", back_populates="shows")
 
 
 
