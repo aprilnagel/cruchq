@@ -1,0 +1,18 @@
+# Ignore everything in this folder
+*
+
+# Allow these exceptions
+!.gitignore
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
+
+# Environment files
+.env
+
+# VS Code
+.vscode/
