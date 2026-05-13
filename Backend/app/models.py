@@ -26,6 +26,7 @@ class Users(db.Model):
     gender_id = db.Column(db.Integer, db.ForeignKey('genders.id'), nullable=True)
     pronouns_id = db.Column(db.Integer, db.ForeignKey('pronouns.id'), nullable=True)
     profile_picture_url = db.Column(db.String(255), nullable=True)
+    touring_since = db.Column(db.Integer, nullable=True)  # The year the user started working on tours, derived from their earliest tour request or crew assignment
     system_role = db.Column(db.String(50), nullable=False, default='user')  # user, admin, superadmin etc. This is separate from the user roles in case we want to have system-level roles that aren't tied to specific tours or shows.
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
     updated_at = db.Column(db.DateTime(timezone=True), onupdate=func.now())

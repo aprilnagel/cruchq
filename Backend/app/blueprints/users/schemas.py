@@ -16,9 +16,15 @@ from datetime import date
 class UserSchema(ma.SQLAlchemySchema):
     class Meta:
         model = Users
-        load_instance = True
         include_fk = False
         include_relationships = False
+        ordered = True
+        fields = (
+            'id', 'first_name', 'last_name', 'email', 'phone', 'city', 'state_province',
+            'country', 'continent', 'bio', 'dob', 'profile_picture_url',
+            'roles', 'gender', 'pronouns', 'touring_since', 'system_role', 'created_at', 'updated_at'
+        )
+        # dump_only = fields  # ⭐ THIS is the missing piece. commenting this out since marshmallow should NOT load these fields since we dont explicitely call a user_schema.load(). We only ever use user_schema.dump(). SOOOO We will see how it goes. 
 
     id = ma.auto_field()
     first_name = ma.auto_field()
@@ -32,17 +38,15 @@ class UserSchema(ma.SQLAlchemySchema):
     bio = ma.auto_field()
     dob = ma.auto_field()
     profile_picture_url = ma.auto_field()
+    touring_since = ma.auto_field()
     system_role = ma.auto_field()
     created_at = ma.auto_field()
     updated_at = ma.auto_field()
 
-    #CONVERTING FOREIGN KEYS TO READABLE STRINGS
-        # - The Users table stores only gender_id and pronouns_id, so the UserSchema uses fields.Method() to follow the relationship and return the readable label (gender_name or pronoun_label) instead of the raw ID.
     gender = fields.Method("get_gender")
     pronouns = fields.Method("get_pronouns")
-
     roles = fields.Method("get_roles")
-    
+
     def get_roles(self, obj):
         return [ur.role.role_name for ur in obj.user_roles] if obj.user_roles else []
 
@@ -54,6 +58,7 @@ class UserSchema(ma.SQLAlchemySchema):
     
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)
+
 
 
 class UserPublicSchema(ma.SQLAlchemySchema):
@@ -74,7 +79,9 @@ class UserPublicSchema(ma.SQLAlchemySchema):
     continent = ma.auto_field()
     gender = fields.Method("get_gender")
     pronouns = fields.Method("get_pronouns")
+    touring_since = ma.auto_field()
     tour_count = fields.Method("get_tour_count")
+    touring_for_years = fields.Method("calculate_touring_years")
     roles = fields.Method("get_roles")
 
     def calculate_age(self, obj):
@@ -98,7 +105,12 @@ class UserPublicSchema(ma.SQLAlchemySchema):
 
     def get_pronouns(self, obj):
         return obj.pronouns.pronoun_label if obj.pronouns else None
-        
+    
+    def calculate_touring_years(self, obj):
+        if obj.touring_since:
+            current_year = date.today().year
+            return current_year - obj.touring_since
+        return None
     
 user_public_schema = UserPublicSchema()
 users_public_schema = UserPublicSchema(many=True)
@@ -123,6 +135,7 @@ class UserUpdateSchema(ma.SQLAlchemySchema):
     continent = ma.auto_field()
     bio = ma.auto_field()
     profile_picture_url = ma.auto_field()
+    touring_since = ma.auto_field()
 
     # Foreign key updates (allowed)
     gender_id = ma.auto_field()
